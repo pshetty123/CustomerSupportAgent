@@ -59,24 +59,28 @@ if reviews_df.empty:
     st.info("No reviews in the selected filters.")
     st.stop()
 
-c1, c2 = st.columns(2)
-with c1:
-    sentiment_counts = reviews_df["sentiment"].value_counts().reset_index()
-    st.plotly_chart(px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment Distribution"), use_container_width=True)
-with c2:
-    priority_counts = reviews_df["priority"].value_counts().reset_index()
-    st.plotly_chart(px.bar(priority_counts, x="priority", y="count", title="Priority Breakdown"), use_container_width=True)
+chart_df = reviews_df[reviews_df["sentiment"] != "ERROR"]
+if chart_df.empty:
+    st.info("All rows in this selection failed to analyze — no chart data to show.")
+else:
+    c1, c2 = st.columns(2)
+    with c1:
+        sentiment_counts = chart_df["sentiment"].value_counts().reset_index()
+        st.plotly_chart(px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment Distribution"), use_container_width=True)
+    with c2:
+        priority_counts = chart_df["priority"].value_counts().reset_index()
+        st.plotly_chart(px.bar(priority_counts, x="priority", y="count", title="Priority Breakdown"), use_container_width=True)
 
-c3, c4 = st.columns(2)
-with c3:
-    category_counts = reviews_df["category"].value_counts().reset_index()
-    st.plotly_chart(px.bar(category_counts, x="category", y="count", title="Category Breakdown"), use_container_width=True)
-with c4:
-    emotion_counts = reviews_df["emotion"].value_counts().reset_index()
-    st.plotly_chart(px.bar(emotion_counts, x="emotion", y="count", title="Emotion Distribution"), use_container_width=True)
+    c3, c4 = st.columns(2)
+    with c3:
+        category_counts = chart_df["category"].value_counts().reset_index()
+        st.plotly_chart(px.bar(category_counts, x="category", y="count", title="Category Breakdown"), use_container_width=True)
+    with c4:
+        emotion_counts = chart_df["emotion"].value_counts().reset_index()
+        st.plotly_chart(px.bar(emotion_counts, x="emotion", y="count", title="Emotion Distribution"), use_container_width=True)
 
-volume = reviews_df.groupby("analyzed_date").size().reset_index(name="count")
-st.plotly_chart(px.line(volume, x="analyzed_date", y="count", title="Review Volume Over Time"), use_container_width=True)
+    volume = chart_df.groupby("analyzed_date").size().reset_index(name="count")
+    st.plotly_chart(px.line(volume, x="analyzed_date", y="count", title="Review Volume Over Time"), use_container_width=True)
 
 st.subheader("Reviews")
 st.dataframe(reviews_df)

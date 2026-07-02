@@ -44,7 +44,6 @@ def insert_batch(conn: sqlite3.Connection, filename: str, row_count: int) -> int
         "INSERT INTO batches (filename, uploaded_at, row_count) VALUES (?, ?, ?)",
         (filename, datetime.now(timezone.utc).isoformat(), row_count),
     )
-    conn.commit()
     return cursor.lastrowid
 
 
@@ -88,7 +87,7 @@ def get_reviews(conn: sqlite3.Connection, batch_id: int | None = None) -> list[d
 
 
 def get_kpis(conn: sqlite3.Connection) -> dict:
-    total_reviews = conn.execute("SELECT COUNT(*) FROM reviews").fetchone()[0]
+    total_reviews = conn.execute("SELECT COUNT(*) FROM reviews WHERE sentiment != 'ERROR'").fetchone()[0]
     total_batches = conn.execute("SELECT COUNT(*) FROM batches").fetchone()[0]
     if total_reviews == 0:
         return {"total_reviews": 0, "total_batches": total_batches, "pct_negative": 0.0, "pct_critical": 0.0}

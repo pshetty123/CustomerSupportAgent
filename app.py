@@ -21,7 +21,11 @@ init_db(config.db_path)
 uploaded_file = st.file_uploader("Upload a CSV of customer reviews", type=["csv"])
 
 if uploaded_file is not None:
-    df = load_csv(uploaded_file)
+    try:
+        df = load_csv(uploaded_file)
+    except Exception as e:
+        st.error(f"Could not read this CSV file: {e}")
+        st.stop()
     st.write("Preview:")
     st.dataframe(df.head())
 
@@ -60,16 +64,20 @@ if "last_results" in st.session_state:
         st.subheader("Results")
         st.dataframe(results_df)
 
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            sentiment_counts = results_df["sentiment"].value_counts().reset_index()
-            st.plotly_chart(px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment"), use_container_width=True)
-        with col2:
-            priority_counts = results_df["priority"].value_counts().reset_index()
-            st.plotly_chart(px.bar(priority_counts, x="priority", y="count", title="Priority"), use_container_width=True)
-        with col3:
-            category_counts = results_df["category"].value_counts().reset_index()
-            st.plotly_chart(px.bar(category_counts, x="category", y="count", title="Category"), use_container_width=True)
+        chart_df = results_df[results_df["sentiment"] != "ERROR"]
+        if chart_df.empty:
+            st.info("All rows failed to analyze — no chart data to show.")
+        else:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                sentiment_counts = chart_df["sentiment"].value_counts().reset_index()
+                st.plotly_chart(px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment"), use_container_width=True)
+            with col2:
+                priority_counts = chart_df["priority"].value_counts().reset_index()
+                st.plotly_chart(px.bar(priority_counts, x="priority", y="count", title="Priority"), use_container_width=True)
+            with col3:
+                category_counts = chart_df["category"].value_counts().reset_index()
+                st.plotly_chart(px.bar(category_counts, x="category", y="count", title="Category"), use_container_width=True)
 
         csv_bytes = results_df.to_csv(index=False).encode("utf-8")
         st.download_button("Download analyzed CSV", csv_bytes, "analyzed_reviews.csv", "text/csv")
