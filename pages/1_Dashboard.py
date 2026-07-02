@@ -31,7 +31,7 @@ if not batches:
     st.stop()
 
 batch_options = {"All batches": None}
-batch_options.update({f"{b['filename']} ({b['uploaded_at'][:10]})": b["id"] for b in batches})
+batch_options.update({f"{b['filename']} ({b['uploaded_at'][:10]}) #{b['id']}": b["id"] for b in batches})
 selected_label = st.sidebar.selectbox("Batch", list(batch_options.keys()))
 selected_batch_id = batch_options[selected_label]
 
@@ -39,6 +39,9 @@ reviews = get_reviews(conn, batch_id=selected_batch_id)
 conn.close()
 
 reviews_df = pd.DataFrame(reviews)
+if reviews_df.empty:
+    st.info("No reviews in the selected batch.")
+    st.stop()
 reviews_df["analyzed_date"] = pd.to_datetime(reviews_df["analyzed_at"]).dt.date
 
 min_date = reviews_df["analyzed_date"].min()
