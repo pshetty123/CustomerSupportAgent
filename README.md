@@ -42,6 +42,7 @@ streamlit run app.py
 ## Tech Stack
 
 - **Streamlit** — UI framework
+- **pandas** — CSV loading and result-set aggregation for charts
 - **google-genai** — official Gemini SDK, used with structured output so the model's
   response is constrained to a validated schema
 - **Pydantic** — defines and validates the AI output schema
