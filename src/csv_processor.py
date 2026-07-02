@@ -2,7 +2,7 @@ import pandas as pd
 
 
 def load_csv(file) -> pd.DataFrame:
-    return pd.read_csv(file, skip_blank_lines=False)
+    return pd.read_csv(file)
 
 
 def get_text_columns(df: pd.DataFrame) -> list[str]:
