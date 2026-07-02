@@ -603,7 +603,7 @@ class FakeGeminiClient:
             summary='summary', suggested_reply='reply',
         )
 
-csv_text = 'review_text\nApp crashes on login\n\n  \nboom this failed\n'
+csv_text = 'review_text\nApp crashes on login\n\"  \"\nboom this failed\n'
 df = load_csv(io.StringIO(csv_text))
 assert get_text_columns(df) == ['review_text']
 
