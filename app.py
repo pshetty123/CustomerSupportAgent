@@ -53,18 +53,23 @@ if uploaded_file is not None:
 
 if "last_results" in st.session_state:
     results_df = pd.DataFrame(st.session_state["last_results"])
-    st.subheader("Results")
-    st.dataframe(results_df)
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.plotly_chart(px.pie(results_df, names="sentiment", title="Sentiment"), use_container_width=True)
-    with col2:
-        priority_counts = results_df["priority"].value_counts().reset_index()
-        st.plotly_chart(px.bar(priority_counts, x="priority", y="count", title="Priority"), use_container_width=True)
-    with col3:
-        category_counts = results_df["category"].value_counts().reset_index()
-        st.plotly_chart(px.bar(category_counts, x="category", y="count", title="Category"), use_container_width=True)
+    if results_df.empty:
+        st.info("No reviews were analyzed (all rows were empty or skipped).")
+    else:
+        st.subheader("Results")
+        st.dataframe(results_df)
 
-    csv_bytes = results_df.to_csv(index=False).encode("utf-8")
-    st.download_button("Download analyzed CSV", csv_bytes, "analyzed_reviews.csv", "text/csv")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            sentiment_counts = results_df["sentiment"].value_counts().reset_index()
+            st.plotly_chart(px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment"), use_container_width=True)
+        with col2:
+            priority_counts = results_df["priority"].value_counts().reset_index()
+            st.plotly_chart(px.bar(priority_counts, x="priority", y="count", title="Priority"), use_container_width=True)
+        with col3:
+            category_counts = results_df["category"].value_counts().reset_index()
+            st.plotly_chart(px.bar(category_counts, x="category", y="count", title="Category"), use_container_width=True)
+
+        csv_bytes = results_df.to_csv(index=False).encode("utf-8")
+        st.download_button("Download analyzed CSV", csv_bytes, "analyzed_reviews.csv", "text/csv")
