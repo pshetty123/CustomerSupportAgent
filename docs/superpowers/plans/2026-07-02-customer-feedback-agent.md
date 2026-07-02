@@ -810,7 +810,8 @@ if reviews_df.empty:
 
 c1, c2 = st.columns(2)
 with c1:
-    st.plotly_chart(px.pie(reviews_df, names="sentiment", title="Sentiment Distribution"), use_container_width=True)
+    sentiment_counts = reviews_df["sentiment"].value_counts().reset_index()
+    st.plotly_chart(px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment Distribution"), use_container_width=True)
 with c2:
     priority_counts = reviews_df["priority"].value_counts().reset_index()
     st.plotly_chart(px.bar(priority_counts, x="priority", y="count", title="Priority Breakdown"), use_container_width=True)
