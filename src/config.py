@@ -21,6 +21,6 @@ def get_config() -> Config:
         )
     return Config(
         gemini_api_key=api_key,
-        gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+        gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
         db_path=os.getenv("DB_PATH", "data/feedback.db"),
     )
