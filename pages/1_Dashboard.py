@@ -23,6 +23,10 @@ def build_summary_digest(chart_df: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
+def escape_markdown_dollars(text: str) -> str:
+    return text.replace("$", "\\$")
+
+
 st.title("Feedback Dashboard")
 
 try:
@@ -85,16 +89,18 @@ else:
         gemini_client = GeminiClient(config.gemini_api_key, config.gemini_model)
         digest = build_summary_digest(chart_df)
         try:
-            st.session_state["exec_summary"] = gemini_client.generate_executive_summary(digest)
+            with st.spinner("Generating executive summary..."):
+                st.session_state["exec_summary"] = gemini_client.generate_executive_summary(digest)
         except Exception as e:
             st.error(f"Could not generate executive summary: {e}")
 
     if "exec_summary" in st.session_state:
         exec_summary = st.session_state["exec_summary"]
-        st.markdown(exec_summary.summary)
-        st.markdown("**Suggested next steps:**")
-        for step in exec_summary.next_steps:
-            st.markdown(f"- {step}")
+        st.markdown(escape_markdown_dollars(exec_summary.summary))
+        if exec_summary.next_steps:
+            st.markdown("**Suggested next steps:**")
+            for step in exec_summary.next_steps:
+                st.markdown(f"- {escape_markdown_dollars(step)}")
 
     c1, c2 = st.columns(2)
     with c1:
