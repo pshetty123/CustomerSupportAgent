@@ -4,6 +4,7 @@ import streamlit as st
 
 from src.config import get_config
 from src.database import get_batches, get_connection, get_kpis, get_reviews, init_db
+from src.chart_colors import TAXONOMY_COLORS
 
 st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
 st.title("Feedback Dashboard")
@@ -66,18 +67,30 @@ else:
     c1, c2 = st.columns(2)
     with c1:
         sentiment_counts = chart_df["sentiment"].value_counts().reset_index()
-        st.plotly_chart(px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment Distribution"), use_container_width=True)
+        st.plotly_chart(
+            px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment Distribution", color="sentiment", color_discrete_map=TAXONOMY_COLORS),
+            use_container_width=True,
+        )
     with c2:
         priority_counts = chart_df["priority"].value_counts().reset_index()
-        st.plotly_chart(px.bar(priority_counts, x="priority", y="count", title="Priority Breakdown"), use_container_width=True)
+        st.plotly_chart(
+            px.bar(priority_counts, x="priority", y="count", title="Priority Breakdown", color="priority", color_discrete_map=TAXONOMY_COLORS),
+            use_container_width=True,
+        )
 
     c3, c4 = st.columns(2)
     with c3:
         category_counts = chart_df["category"].value_counts().reset_index()
-        st.plotly_chart(px.bar(category_counts, x="category", y="count", title="Category Breakdown"), use_container_width=True)
+        st.plotly_chart(
+            px.bar(category_counts, x="category", y="count", title="Category Breakdown", color="category", color_discrete_map=TAXONOMY_COLORS),
+            use_container_width=True,
+        )
     with c4:
         emotion_counts = chart_df["emotion"].value_counts().reset_index()
-        st.plotly_chart(px.bar(emotion_counts, x="emotion", y="count", title="Emotion Distribution"), use_container_width=True)
+        st.plotly_chart(
+            px.bar(emotion_counts, x="emotion", y="count", title="Emotion Distribution", color="emotion", color_discrete_map=TAXONOMY_COLORS),
+            use_container_width=True,
+        )
 
     volume = chart_df.groupby("analyzed_date").size().reset_index(name="count")
     st.plotly_chart(px.line(volume, x="analyzed_date", y="count", title="Review Volume Over Time"), use_container_width=True)

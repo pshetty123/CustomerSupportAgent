@@ -6,6 +6,7 @@ from src.config import get_config
 from src.csv_processor import get_text_columns, load_csv, process_reviews
 from src.database import get_connection, init_db, insert_batch, insert_reviews
 from src.gemini_client import GeminiClient
+from src.chart_colors import TAXONOMY_COLORS
 
 st.set_page_config(page_title="AI Customer Feedback Agent", page_icon="💬", layout="wide")
 st.title("AI Customer Feedback Agent")
@@ -71,13 +72,22 @@ if "last_results" in st.session_state:
             col1, col2, col3 = st.columns(3)
             with col1:
                 sentiment_counts = chart_df["sentiment"].value_counts().reset_index()
-                st.plotly_chart(px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment"), use_container_width=True)
+                st.plotly_chart(
+                    px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment", color="sentiment", color_discrete_map=TAXONOMY_COLORS),
+                    use_container_width=True,
+                )
             with col2:
                 priority_counts = chart_df["priority"].value_counts().reset_index()
-                st.plotly_chart(px.bar(priority_counts, x="priority", y="count", title="Priority"), use_container_width=True)
+                st.plotly_chart(
+                    px.bar(priority_counts, x="priority", y="count", title="Priority", color="priority", color_discrete_map=TAXONOMY_COLORS),
+                    use_container_width=True,
+                )
             with col3:
                 category_counts = chart_df["category"].value_counts().reset_index()
-                st.plotly_chart(px.bar(category_counts, x="category", y="count", title="Category"), use_container_width=True)
+                st.plotly_chart(
+                    px.bar(category_counts, x="category", y="count", title="Category", color="category", color_discrete_map=TAXONOMY_COLORS),
+                    use_container_width=True,
+                )
 
         csv_bytes = results_df.to_csv(index=False).encode("utf-8")
         st.download_button("Download analyzed CSV", csv_bytes, "analyzed_reviews.csv", "text/csv")
