@@ -43,3 +43,8 @@ class AnalysisResult(BaseModel):
     priority: Priority
     summary: str = Field(..., description="1-2 sentence summary of the review")
     suggested_reply: str = Field(..., description="Draft support reply, ready to send or edit")
+
+
+class ExecutiveSummary(BaseModel):
+    summary: str = Field(..., description="2-4 sentence narrative summary of patterns in the feedback")
+    next_steps: list[str] = Field(..., description="3-5 concrete next steps for the product team")
