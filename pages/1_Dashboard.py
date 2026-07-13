@@ -5,8 +5,24 @@ import streamlit as st
 from src.config import get_config
 from src.database import get_batches, get_connection, get_kpis, get_reviews, init_db
 from src.chart_colors import TAXONOMY_COLORS
+from src.gemini_client import GeminiClient
 
 st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
+
+
+def build_summary_digest(chart_df: pd.DataFrame) -> str:
+    lines = ["Aggregate counts:"]
+    for col in ["sentiment", "emotion", "category", "priority"]:
+        counts = chart_df[col].value_counts().to_dict()
+        counts_str = ", ".join(f"{k}: {v}" for k, v in counts.items())
+        lines.append(f"- {col.capitalize()}: {counts_str}")
+    lines.append("")
+    lines.append("Individual review summaries:")
+    for _, row in chart_df.iterrows():
+        lines.append(f"- [{row['priority']} priority, {row['category']}] {row['summary']}")
+    return "\n".join(lines)
+
+
 st.title("Feedback Dashboard")
 
 try:
@@ -64,6 +80,22 @@ chart_df = reviews_df[reviews_df["sentiment"] != "ERROR"]
 if chart_df.empty:
     st.info("All rows in this selection failed to analyze — no chart data to show.")
 else:
+    st.subheader("Executive Summary")
+    if st.button("Generate Executive Summary"):
+        gemini_client = GeminiClient(config.gemini_api_key, config.gemini_model)
+        digest = build_summary_digest(chart_df)
+        try:
+            st.session_state["exec_summary"] = gemini_client.generate_executive_summary(digest)
+        except Exception as e:
+            st.error(f"Could not generate executive summary: {e}")
+
+    if "exec_summary" in st.session_state:
+        exec_summary = st.session_state["exec_summary"]
+        st.markdown(exec_summary.summary)
+        st.markdown("**Suggested next steps:**")
+        for step in exec_summary.next_steps:
+            st.markdown(f"- {step}")
+
     c1, c2 = st.columns(2)
     with c1:
         sentiment_counts = chart_df["sentiment"].value_counts().reset_index()
