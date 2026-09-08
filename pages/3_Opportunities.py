@@ -5,10 +5,12 @@ from src.config import get_config
 from src.database import (
     get_batches,
     get_connection,
+    get_opportunities,
     get_pillars,
     get_reviews,
     init_db,
     insert_opportunities,
+    update_opportunity,
 )
 from src.gemini_client import GeminiClient
 
@@ -87,3 +89,71 @@ else:
             st.success(f"Found {len(proposal_dicts)} opportunities — see the review queue below.")
         except Exception as e:
             st.error(f"Could not generate opportunities: {e}")
+
+conn = get_connection(config.db_path)
+proposed = [o for o in get_opportunities(conn, status="proposed") if o["batch_id"] == selected_batch_id]
+pillars_by_id = {p["id"]: p["name"] for p in pillars}
+pillar_names = ["(no matching pillar)"] + [p["name"] for p in pillars]
+
+if proposed:
+    st.subheader("Review Queue")
+    for opp in proposed:
+        current_pillar_name = pillars_by_id.get(opp["pillar_id"], "(no matching pillar)")
+        with st.expander(f"{opp['title']} — {opp['theme']}"):
+            st.caption(f"Evidence: {opp['evidence_count']} reviews")
+            st.write(opp["rationale"])
+            title = st.text_input("Title", value=opp["title"], key=f"title_{opp['id']}")
+            description = st.text_area("Description", value=opp["description"], key=f"desc_{opp['id']}")
+            pillar_choice = st.selectbox(
+                "Strategy pillar",
+                pillar_names,
+                index=pillar_names.index(current_pillar_name) if current_pillar_name in pillar_names else 0,
+                key=f"pillar_{opp['id']}",
+            )
+            chosen_pillar_id = next((p["id"] for p in pillars if p["name"] == pillar_choice), None)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Approve", key=f"approve_{opp['id']}", type="primary"):
+                    update_opportunity(
+                        conn, opp["id"], title=title, description=description,
+                        pillar_id=chosen_pillar_id, status="approved",
+                    )
+                    st.rerun()
+            with col2:
+                if st.button("Reject", key=f"reject_{opp['id']}"):
+                    update_opportunity(
+                        conn, opp["id"], title=title, description=description,
+                        pillar_id=chosen_pillar_id, status="rejected",
+                    )
+                    st.rerun()
+
+st.subheader("Approved Opportunities")
+approved = get_opportunities(conn, status="approved")
+if not approved:
+    st.info("No approved opportunities yet.")
+else:
+    batches_by_id = {b["id"]: b["filename"] for b in batches}
+    approved_rows = [
+        {
+            "Title": o["title"],
+            "Pillar": pillars_by_id.get(o["pillar_id"], "—"),
+            "Batch": batches_by_id.get(o["batch_id"], "—"),
+            "Created": o["created_at"][:10],
+        }
+        for o in approved
+    ]
+    st.dataframe(pd.DataFrame(approved_rows), use_container_width=True)
+
+if st.checkbox("Show rejected"):
+    rejected = get_opportunities(conn, status="rejected")
+    if not rejected:
+        st.info("No rejected opportunities.")
+    else:
+        rejected_rows = [
+            {"Title": o["title"], "Theme": o["theme"], "Reviewed": (o["reviewed_at"] or "")[:10]}
+            for o in rejected
+        ]
+        st.dataframe(pd.DataFrame(rejected_rows), use_container_width=True)
+
+conn.close()
