@@ -21,6 +21,27 @@ CREATE TABLE IF NOT EXISTS reviews (
     suggested_reply TEXT NOT NULL,
     analyzed_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS strategy_pillars (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS opportunities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    batch_id INTEGER NOT NULL REFERENCES batches(id),
+    pillar_id INTEGER REFERENCES strategy_pillars(id),
+    theme TEXT NOT NULL,
+    evidence_count INTEGER NOT NULL,
+    rationale TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'proposed',
+    created_at TEXT NOT NULL,
+    reviewed_at TEXT
+);
 """
 
 
@@ -99,3 +120,73 @@ def get_kpis(conn: sqlite3.Connection) -> dict:
         "pct_negative": round(negative / total_reviews * 100, 1),
         "pct_critical": round(critical / total_reviews * 100, 1),
     }
+
+
+def insert_pillar(conn: sqlite3.Connection, name: str, description: str) -> int:
+    cursor = conn.execute(
+        "INSERT INTO strategy_pillars (name, description, created_at) VALUES (?, ?, ?)",
+        (name, description, datetime.now(timezone.utc).isoformat()),
+    )
+    conn.commit()
+    return cursor.lastrowid
+
+
+def get_pillars(conn: sqlite3.Connection) -> list[dict]:
+    rows = conn.execute("SELECT * FROM strategy_pillars ORDER BY created_at").fetchall()
+    return [dict(row) for row in rows]
+
+
+def delete_pillar(conn: sqlite3.Connection, pillar_id: int) -> None:
+    conn.execute("DELETE FROM strategy_pillars WHERE id = ?", (pillar_id,))
+    conn.commit()
+
+
+def insert_opportunities(conn: sqlite3.Connection, batch_id: int, proposals: list[dict]) -> None:
+    now = datetime.now(timezone.utc).isoformat()
+    conn.executemany(
+        """INSERT INTO opportunities
+           (batch_id, pillar_id, theme, evidence_count, rationale, title, description, status, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'proposed', ?)""",
+        [
+            (
+                batch_id,
+                p["pillar_id"],
+                p["theme"],
+                p["evidence_count"],
+                p["rationale"],
+                p["title"],
+                p["description"],
+                now,
+            )
+            for p in proposals
+        ],
+    )
+    conn.commit()
+
+
+def get_opportunities(conn: sqlite3.Connection, status: str | None = None) -> list[dict]:
+    if status is not None:
+        rows = conn.execute(
+            "SELECT * FROM opportunities WHERE status = ? ORDER BY created_at DESC", (status,)
+        ).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM opportunities ORDER BY created_at DESC").fetchall()
+    return [dict(row) for row in rows]
+
+
+def update_opportunity(
+    conn: sqlite3.Connection,
+    opportunity_id: int,
+    *,
+    title: str,
+    description: str,
+    pillar_id: int | None,
+    status: str,
+) -> None:
+    conn.execute(
+        """UPDATE opportunities
+           SET title = ?, description = ?, pillar_id = ?, status = ?, reviewed_at = ?
+           WHERE id = ?""",
+        (title, description, pillar_id, status, datetime.now(timezone.utc).isoformat(), opportunity_id),
+    )
+    conn.commit()
