@@ -62,4 +62,4 @@ class OpportunityProposal(BaseModel):
 
 
 class OpportunityProposals(BaseModel):
-    proposals: list[OpportunityProposal]
+    proposals: list[OpportunityProposal] = Field(..., description="List of opportunity proposals")
