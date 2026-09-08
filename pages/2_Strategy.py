@@ -2,6 +2,7 @@ import streamlit as st
 
 from src.config import get_config
 from src.database import delete_pillar, get_connection, get_pillars, init_db, insert_pillar
+from src.text_utils import escape_markdown_dollars
 
 st.set_page_config(page_title="Strategy", page_icon="🧭", layout="wide")
 st.title("Strategy Pillars")
@@ -38,8 +39,8 @@ else:
     for pillar in pillars:
         col1, col2 = st.columns([5, 1])
         with col1:
-            st.markdown(f"**{pillar['name']}**")
-            st.write(pillar["description"])
+            st.markdown(f"**{escape_markdown_dollars(pillar['name'])}**")
+            st.write(escape_markdown_dollars(pillar["description"]))
         with col2:
             if st.button("Delete", key=f"delete_pillar_{pillar['id']}"):
                 delete_conn = get_connection(config.db_path)

@@ -13,6 +13,7 @@ from src.database import (
     update_opportunity,
 )
 from src.gemini_client import GeminiClient
+from src.text_utils import escape_markdown_dollars
 
 st.set_page_config(page_title="Opportunities", page_icon="🎯", layout="wide")
 st.title("Opportunities")
@@ -99,9 +100,9 @@ if proposed:
     st.subheader("Review Queue")
     for opp in proposed:
         current_pillar_name = pillars_by_id.get(opp["pillar_id"], "(no matching pillar)")
-        with st.expander(f"{opp['title']} — {opp['theme']}"):
+        with st.expander(f"{escape_markdown_dollars(opp['title'])} — {escape_markdown_dollars(opp['theme'])}"):
             st.caption(f"Evidence: {opp['evidence_count']} reviews")
-            st.write(opp["rationale"])
+            st.write(escape_markdown_dollars(opp["rationale"]))
             title = st.text_input("Title", value=opp["title"], key=f"title_{opp['id']}")
             description = st.text_area("Description", value=opp["description"], key=f"desc_{opp['id']}")
             pillar_choice = st.selectbox(
