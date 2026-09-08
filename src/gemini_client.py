@@ -2,7 +2,7 @@ from google import genai
 from google.genai import types
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from src.schemas import AnalysisResult, ExecutiveSummary
+from src.schemas import AnalysisResult, ExecutiveSummary, OpportunityProposals
 
 PROMPT_TEMPLATE = """You are a customer support analyst. Analyze the following customer \
 review and extract structured information about it.
@@ -26,6 +26,22 @@ Write a short executive summary (2-4 sentences) describing the overall patterns 
 what customers are saying, which issues are most common, and how urgent they are. Then suggest \
 3-5 concrete, specific next steps for the product team, grounded in the actual categories and \
 priorities present in the data below — not generic advice.
+
+Feedback data:
+{digest}
+"""
+
+OPPORTUNITIES_PROMPT_TEMPLATE = """You are a product strategist reviewing a batch of already-triaged \
+customer feedback against your team's current strategic pillars.
+
+First, cluster the feedback below into recurring themes — patterns that show up across multiple \
+reviews, not one-off complaints. For each theme, propose a concrete product opportunity: a title, a \
+1-3 sentence description, and a rationale for how it relates to the strategy pillars listed below. If \
+a theme does not clearly relate to any pillar, say so in the rationale and set matched_pillar to null \
+rather than forcing a match. Report how many reviews support each theme as evidence_count.
+
+Strategy pillars:
+{pillars}
 
 Feedback data:
 {digest}
@@ -60,3 +76,19 @@ class GeminiClient:
             ),
         )
         return ExecutiveSummary.model_validate_json(response.text)
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8), reraise=True)
+    def generate_opportunities(self, digest_text: str, pillars: list[dict]) -> OpportunityProposals:
+        if pillars:
+            pillars_text = "\n".join(f"- {p['name']}: {p['description']}" for p in pillars)
+        else:
+            pillars_text = "(no strategy pillars defined yet)"
+        response = self._client.models.generate_content(
+            model=self._model,
+            contents=OPPORTUNITIES_PROMPT_TEMPLATE.format(pillars=pillars_text, digest=digest_text),
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=OpportunityProposals,
+            ),
+        )
+        return OpportunityProposals.model_validate_json(response.text)

@@ -6,6 +6,7 @@ from src.config import get_config
 from src.database import get_batches, get_connection, get_kpis, get_reviews, init_db
 from src.chart_colors import TAXONOMY_COLORS
 from src.gemini_client import GeminiClient
+from src.text_utils import escape_markdown_dollars
 
 st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
 
@@ -21,10 +22,6 @@ def build_summary_digest(chart_df: pd.DataFrame) -> str:
     for _, row in chart_df.iterrows():
         lines.append(f"- [{row['priority']} priority, {row['category']}] {row['summary']}")
     return "\n".join(lines)
-
-
-def escape_markdown_dollars(text: str) -> str:
-    return text.replace("$", "\\$")
 
 
 st.title("Feedback Dashboard")

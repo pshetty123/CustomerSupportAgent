@@ -48,3 +48,18 @@ class AnalysisResult(BaseModel):
 class ExecutiveSummary(BaseModel):
     summary: str = Field(..., description="2-4 sentence narrative summary of patterns in the feedback")
     next_steps: list[str] = Field(..., description="3-5 concrete next steps for the product team")
+
+
+class OpportunityProposal(BaseModel):
+    theme: str = Field(..., description="The recurring feedback pattern observed")
+    evidence_count: int = Field(..., description="Number of reviews supporting this theme")
+    matched_pillar: str | None = Field(
+        ..., description="Name of the strategy pillar this relates to, or null if none"
+    )
+    rationale: str = Field(..., description="Why this theme is or isn't aligned with strategy")
+    title: str = Field(..., description="Proposed opportunity title")
+    description: str = Field(..., description="1-3 sentence proposed opportunity description")
+
+
+class OpportunityProposals(BaseModel):
+    proposals: list[OpportunityProposal] = Field(..., description="List of opportunity proposals")
