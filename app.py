@@ -11,6 +11,14 @@ from src.gemini_client import GeminiClient
 from src.chart_colors import TAXONOMY_COLORS
 from src.theme import PLOTLY_DARK_LAYOUT, apply_theme, demo_walkthrough_html
 
+DEMO_SAMPLE_DATASETS = {
+    "Meridian Financial Firm": "meridian_financial_feedback.csv",
+    "ABC AI Product Solutions": "abc_ai_product_feedback.csv",
+    "PS Marketplace (like Amazon, Etsy)": "ps_marketplace_feedback.csv",
+    "Y HealthCare": "y_healthcare_feedback.csv",
+    "Large Tech Enterprise": "large_tech_enterprise_feedback.csv",
+}
+
 st.set_page_config(page_title="AI Customer Feedback Agent", page_icon="💬", layout="wide")
 apply_theme()
 st.title("AI Customer Feedback Agent")
@@ -33,14 +41,20 @@ if config.demo_mode:
 
     st.caption(f"Demo mode — {remaining} of {config.demo_daily_call_limit} AI calls left today.")
 
-    sample_paths = sorted(Path("samples").glob("*.csv"))
-    sample_options = {p.name: p for p in sample_paths}
-    selected_name = st.selectbox("Choose a sample dataset to analyze", list(sample_options.keys()))
+    selected_label = st.selectbox(
+        "Choose a sample dataset to analyze",
+        list(DEMO_SAMPLE_DATASETS.keys()),
+        index=None,
+        placeholder="Select a dataset…",
+    )
     uploaded_file = None
-    uploaded_filename = selected_name
-    if selected_name:
+    df = None
+    uploaded_filename = None
+    if selected_label:
+        sample_path = Path("samples") / DEMO_SAMPLE_DATASETS[selected_label]
+        uploaded_filename = sample_path.name
         try:
-            df = load_csv(sample_options[selected_name])
+            df = load_csv(sample_path)
         except Exception as e:
             st.error(f"Could not read this CSV file: {e}")
             st.stop()
