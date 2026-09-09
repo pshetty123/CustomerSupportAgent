@@ -201,6 +201,23 @@ def demo_walkthrough_html() -> str:
         border-color: #E8002D;
         color: #ffffff;
     }}
+    .st-key-dataset-picker {{
+        border: 2px solid #E8002D !important;
+        background: rgba(232,0,45,0.06);
+        border-radius: 12px;
+        box-shadow: 0 0 28px rgba(232,0,45,0.18);
+        padding: 6px 6px 2px 6px;
+        margin-top: 6px;
+        margin-bottom: 6px;
+    }}
+    .dataset-picker-eyebrow {{
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        letter-spacing: 0.15em;
+        color: #E8002D;
+        font-weight: 700;
+        text-transform: uppercase;
+    }}
     </style>
     <div>
         <div class="demo-step-eyebrow">HOW TO TRY IT</div>
@@ -209,3 +226,7 @@ def demo_walkthrough_html() -> str:
         {cards}
     </div>
     """
+
+
+def dataset_picker_eyebrow_html() -> str:
+    return '<div class="dataset-picker-eyebrow">👉 Step 02 — Choose Your Dataset to Begin</div>'

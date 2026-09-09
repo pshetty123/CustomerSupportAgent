@@ -9,7 +9,7 @@ from src.csv_processor import get_text_columns, load_csv, process_reviews
 from src.database import get_connection, get_today_usage, init_db, insert_batch, insert_reviews, record_usage
 from src.gemini_client import GeminiClient
 from src.chart_colors import TAXONOMY_COLORS
-from src.theme import PLOTLY_DARK_LAYOUT, apply_theme, demo_walkthrough_html
+from src.theme import PLOTLY_DARK_LAYOUT, apply_theme, dataset_picker_eyebrow_html, demo_walkthrough_html
 
 DEMO_SAMPLE_DATASETS = {
     "Meridian Financial Firm": "meridian_financial_feedback.csv",
@@ -39,14 +39,16 @@ if config.demo_mode:
 
     st.markdown(demo_walkthrough_html(), unsafe_allow_html=True)
 
-    st.caption(f"Demo mode — {remaining} of {config.demo_daily_call_limit} AI calls left today.")
+    with st.container(border=True, key="dataset-picker"):
+        st.markdown(dataset_picker_eyebrow_html(), unsafe_allow_html=True)
+        selected_label = st.selectbox(
+            "Choose a sample dataset to analyze",
+            list(DEMO_SAMPLE_DATASETS.keys()),
+            index=None,
+            placeholder="Select a dataset…",
+        )
 
-    selected_label = st.selectbox(
-        "Choose a sample dataset to analyze",
-        list(DEMO_SAMPLE_DATASETS.keys()),
-        index=None,
-        placeholder="Select a dataset…",
-    )
+    st.caption(f"Demo mode — {remaining} of {config.demo_daily_call_limit} AI calls left today.")
     uploaded_file = None
     df = None
     uploaded_filename = None
