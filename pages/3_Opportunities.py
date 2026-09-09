@@ -17,11 +17,11 @@ from src.database import (
 )
 from src.gemini_client import GeminiClient
 from src.text_utils import escape_markdown_dollars
-from src.theme import apply_theme
+from src.theme import apply_theme, page_header_html
 
 st.set_page_config(page_title="Opportunities", page_icon="🎯", layout="wide")
 apply_theme()
-st.title("Opportunities")
+st.markdown(page_header_html("Opportunities"), unsafe_allow_html=True)
 
 
 def build_opportunity_digest(reviews_df: pd.DataFrame) -> str:

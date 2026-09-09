@@ -7,7 +7,7 @@ from src.database import get_batches, get_connection, get_kpis, get_reviews, get
 from src.chart_colors import TAXONOMY_COLORS
 from src.gemini_client import GeminiClient
 from src.text_utils import escape_markdown_dollars
-from src.theme import PLOTLY_DARK_LAYOUT, apply_theme
+from src.theme import PLOTLY_DARK_LAYOUT, apply_theme, page_header_html
 
 st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
 apply_theme()
@@ -26,7 +26,7 @@ def build_summary_digest(chart_df: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
-st.title("Feedback Dashboard")
+st.markdown(page_header_html("Feedback Dashboard"), unsafe_allow_html=True)
 
 try:
     config = get_config()

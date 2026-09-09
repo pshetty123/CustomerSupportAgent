@@ -9,7 +9,15 @@ from src.csv_processor import get_text_columns, load_csv, process_reviews
 from src.database import get_connection, get_today_usage, init_db, insert_batch, insert_reviews, record_usage
 from src.gemini_client import GeminiClient
 from src.chart_colors import TAXONOMY_COLORS
-from src.theme import PLOTLY_DARK_LAYOUT, apply_theme, dataset_picker_eyebrow_html, demo_walkthrough_html
+from src.theme import (
+    PLOTLY_DARK_LAYOUT,
+    apply_theme,
+    dataset_picker_eyebrow_html,
+    demo_intro_html,
+    demo_step_02_header_html,
+    demo_step_html,
+    page_header_html,
+)
 
 DEMO_SAMPLE_DATASETS = {
     "Meridian Financial Firm": "meridian_financial_feedback.csv",
@@ -21,7 +29,7 @@ DEMO_SAMPLE_DATASETS = {
 
 st.set_page_config(page_title="AI Customer Feedback Agent", page_icon="💬", layout="wide")
 apply_theme()
-st.title("AI Customer Feedback Agent")
+st.markdown(page_header_html("AI Customer Feedback Agent"), unsafe_allow_html=True)
 
 try:
     config = get_config()
@@ -37,16 +45,21 @@ if config.demo_mode:
     conn.close()
     remaining = max(config.demo_daily_call_limit - today_usage, 0)
 
-    st.markdown(demo_walkthrough_html(), unsafe_allow_html=True)
+    st.markdown(demo_intro_html(), unsafe_allow_html=True)
+    st.markdown(demo_step_html("01"), unsafe_allow_html=True)
 
-    with st.container(border=True, key="dataset-picker"):
-        st.markdown(dataset_picker_eyebrow_html(), unsafe_allow_html=True)
-        selected_label = st.selectbox(
-            "Choose a sample dataset to analyze",
-            list(DEMO_SAMPLE_DATASETS.keys()),
-            index=None,
-            placeholder="Select a dataset…",
-        )
+    with st.container(border=True, key="step-02-card"):
+        st.markdown(demo_step_02_header_html(), unsafe_allow_html=True)
+        with st.container(border=True, key="dataset-picker"):
+            st.markdown(dataset_picker_eyebrow_html(), unsafe_allow_html=True)
+            selected_label = st.selectbox(
+                "Choose a sample dataset to analyze",
+                list(DEMO_SAMPLE_DATASETS.keys()),
+                index=None,
+                placeholder="Select a dataset…",
+            )
+
+    st.markdown(demo_step_html("03"), unsafe_allow_html=True)
 
     st.caption(f"Demo mode — {remaining} of {config.demo_daily_call_limit} AI calls left today.")
     uploaded_file = None

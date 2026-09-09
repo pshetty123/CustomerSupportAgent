@@ -3,11 +3,11 @@ import streamlit as st
 from src.config import get_config
 from src.database import delete_pillar, ensure_demo_pillars, get_connection, get_pillars, init_db, insert_pillar
 from src.text_utils import escape_markdown_dollars
-from src.theme import apply_theme
+from src.theme import apply_theme, page_header_html
 
 st.set_page_config(page_title="Strategy", page_icon="🧭", layout="wide")
 apply_theme()
-st.title("Strategy Pillars")
+st.markdown(page_header_html("Strategy Pillars"), unsafe_allow_html=True)
 
 try:
     config = get_config()
