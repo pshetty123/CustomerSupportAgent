@@ -28,6 +28,23 @@ if config.demo_mode:
     today_usage = get_today_usage(conn)
     conn.close()
     remaining = max(config.demo_daily_call_limit - today_usage, 0)
+
+    with st.container(border=True):
+        st.markdown("**👋 Welcome — this is a live, shared demo. No signup needed. Follow these 3 steps:**")
+        step1, step2, step3 = st.columns(3)
+        with step1:
+            st.markdown("**1. Strategic Pillars**")
+            st.caption("Pre-work — already done for you. Three default pillars are pre-loaded. Peek at them, edit them, or add your own.")
+            st.page_link("pages/2_Strategy.py", label="Open Strategy", icon="🧭")
+        with step2:
+            st.markdown("**2. Upload Feedback**")
+            st.caption("Pick a sample dataset below and click Analyze.")
+        with step3:
+            st.markdown("**3. See It In Action**")
+            st.caption("Check the Dashboard for an AI summary, then Opportunities for AI-proposed, strategy-aligned action.")
+            st.page_link("pages/1_Dashboard.py", label="Open Dashboard", icon="📊")
+            st.page_link("pages/3_Opportunities.py", label="Open Opportunities", icon="🎯")
+
     st.caption(f"Demo mode — {remaining} of {config.demo_daily_call_limit} AI calls left today.")
 
     sample_paths = sorted(Path("samples").glob("*.csv"))
