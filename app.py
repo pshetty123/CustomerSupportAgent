@@ -17,6 +17,8 @@ from src.theme import (
     demo_step_02_header_html,
     demo_step_html,
     page_header_html,
+    render_sidebar_footer,
+    render_sidebar_header_and_nav,
 )
 
 DEMO_SAMPLE_DATASETS = {
@@ -29,6 +31,8 @@ DEMO_SAMPLE_DATASETS = {
 
 st.set_page_config(page_title="AI Customer Feedback Agent", page_icon="💬", layout="wide")
 apply_theme()
+render_sidebar_header_and_nav("app")
+render_sidebar_footer()
 st.markdown(page_header_html("AI Customer Feedback Agent"), unsafe_allow_html=True)
 
 try:

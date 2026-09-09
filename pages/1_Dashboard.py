@@ -7,10 +7,17 @@ from src.database import get_batches, get_connection, get_kpis, get_reviews, get
 from src.chart_colors import TAXONOMY_COLORS
 from src.gemini_client import GeminiClient
 from src.text_utils import escape_markdown_dollars
-from src.theme import PLOTLY_DARK_LAYOUT, apply_theme, page_header_html
+from src.theme import (
+    PLOTLY_DARK_LAYOUT,
+    apply_theme,
+    page_header_html,
+    render_sidebar_footer,
+    render_sidebar_header_and_nav,
+)
 
 st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
 apply_theme()
+render_sidebar_header_and_nav("Dashboard")
 
 
 def build_summary_digest(chart_df: pd.DataFrame) -> str:
@@ -69,6 +76,7 @@ max_date = reviews_df["analyzed_date"].max()
 date_range = st.sidebar.date_input(
     "Date range", value=(min_date, max_date), min_value=min_date, max_value=max_date
 )
+render_sidebar_footer()
 if isinstance(date_range, tuple) and len(date_range) == 2:
     start_date, end_date = date_range
     reviews_df = reviews_df[

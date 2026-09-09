@@ -38,6 +38,130 @@ html, body, [class*="css"] {{
     border-radius: 12px;
 }}
 
+/* Custom sidebar nav replaces Streamlit's auto-generated page list */
+[data-testid="stSidebarNav"] {{
+    display: none;
+}}
+[data-testid="stSidebarUserContent"] {{
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 3rem);
+}}
+.sidebar-brand {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0 18px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 10px;
+}}
+.sidebar-brand-title {{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+}}
+.sidebar-nav-link {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: rgba(255,255,255,0.65);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    transition: background 0.15s ease, color 0.15s ease;
+}}
+.sidebar-nav-link:hover {{
+    background: rgba(255,255,255,0.05);
+    color: #ffffff;
+}}
+.sidebar-nav-link.active {{
+    background: rgba(255,255,255,0.08);
+    color: #ffffff;
+    font-weight: 600;
+}}
+.sidebar-nav-link svg {{
+    flex-shrink: 0;
+}}
+.sidebar-footer {{
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}}
+.sidebar-status {{
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}}
+.sidebar-status-dot {{
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34,197,94,0.7);
+    flex-shrink: 0;
+}}
+.sidebar-author {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}}
+.sidebar-author-avatar {{
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, {ACCENT_BLUE}, #8B5CF6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+}}
+.sidebar-author-text {{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}}
+.sidebar-author-label {{
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+}}
+.sidebar-author-name {{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+}}
+.sidebar-hosted-link {{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+}}
+.sidebar-hosted-link:hover {{
+    color: rgba(255,255,255,0.8);
+}}
+
 .page-header {{
     display: flex;
     align-items: center;
@@ -319,3 +443,79 @@ def demo_step_02_header_html() -> str:
 
 def dataset_picker_eyebrow_html() -> str:
     return '<div class="dataset-picker-eyebrow">👉 STEP 02 — CHOOSE YOUR DATASET TO BEGIN</div>'
+
+
+_NAV_ICONS = {
+    "app": (
+        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none">'
+        '<rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/>'
+        '<path d="M3 9H21" stroke="currentColor" stroke-width="1.6"/></svg>'
+    ),
+    "Dashboard": (
+        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none">'
+        '<path d="M4 20V13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+        '<path d="M12 20V6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+        '<path d="M20 20V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
+    ),
+    "Strategy": (
+        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none">'
+        '<circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/>'
+        '<circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.6"/>'
+        '<circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>'
+    ),
+    "Opportunities": (
+        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none">'
+        '<path d="M9 18H15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+        '<path d="M10 21H14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+        '<path d="M12 3C8.5 3 6 5.6 6 9C6 11.2 7.1 12.5 8 13.5C8.6 14.2 9 14.8 9 15.5H15'
+        'C15 14.8 15.4 14.2 16 13.5C16.9 12.5 18 11.2 18 9C18 5.6 15.5 3 12 3Z" '
+        'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
+    ),
+}
+
+_NAV_ITEMS = [
+    ("app", "Analyze", ""),
+    ("Dashboard", "Dashboard", "Dashboard"),
+    ("Strategy", "Strategy", "Strategy"),
+    ("Opportunities", "Opportunities", "Opportunities"),
+]
+
+
+def render_sidebar_header_and_nav(active: str) -> None:
+    """Render the custom sidebar's brand header + nav, replacing Streamlit's
+    auto-generated page list. `active` is one of the keys in _NAV_ITEMS's first element.
+    Call `render_sidebar_footer()` after any page-specific sidebar widgets
+    (e.g. Dashboard's filters) so the footer stays the last thing in the sidebar."""
+    links_html = ""
+    for key, label, href in _NAV_ITEMS:
+        classes = "sidebar-nav-link active" if key == active else "sidebar-nav-link"
+        links_html += f'<a class="{classes}" href="{href}" target="_self">{_NAV_ICONS[key]}<span>{label}</span></a>'
+
+    st.sidebar.markdown(
+        f"""
+        <div class="sidebar-brand">{_TERMINAL_ICON_SVG}<span class="sidebar-brand-title">AI Feedback Agent</span></div>
+        <div>{links_html}</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_sidebar_footer() -> None:
+    st.sidebar.markdown(
+        """
+        <div class="sidebar-footer">
+            <div class="sidebar-status"><span class="sidebar-status-dot"></span>System Online</div>
+            <div class="sidebar-author">
+                <div class="sidebar-author-avatar">PS</div>
+                <div class="sidebar-author-text">
+                    <span class="sidebar-author-label">Created by</span>
+                    <span class="sidebar-author-name">pshetty123</span>
+                </div>
+            </div>
+            <a class="sidebar-hosted-link" href="https://streamlit.io" target="_blank" rel="noopener noreferrer">
+                Hosted with Streamlit ↗
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
