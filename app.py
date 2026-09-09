@@ -73,7 +73,10 @@ if df is not None:
     st.write("Preview:")
     st.dataframe(df.head())
 
-    text_column = st.selectbox("Which column contains the review text?", get_text_columns(df))
+    if config.demo_mode:
+        text_column = "review_text"
+    else:
+        text_column = st.selectbox("Which column contains the review text?", get_text_columns(df))
 
     if config.demo_mode and today_usage >= config.demo_daily_call_limit:
         st.warning("Demo usage limit reached for today. Please check back tomorrow!")
