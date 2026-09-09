@@ -9,7 +9,7 @@ from src.csv_processor import get_text_columns, load_csv, process_reviews
 from src.database import get_connection, get_today_usage, init_db, insert_batch, insert_reviews, record_usage
 from src.gemini_client import GeminiClient
 from src.chart_colors import TAXONOMY_COLORS
-from src.theme import PLOTLY_DARK_LAYOUT, apply_theme
+from src.theme import PLOTLY_DARK_LAYOUT, apply_theme, demo_walkthrough_html
 
 st.set_page_config(page_title="AI Customer Feedback Agent", page_icon="💬", layout="wide")
 apply_theme()
@@ -29,21 +29,7 @@ if config.demo_mode:
     conn.close()
     remaining = max(config.demo_daily_call_limit - today_usage, 0)
 
-    with st.container(border=True):
-        st.markdown("**👋 Welcome — this is a live, shared demo. No signup needed. Follow these 3 steps:**")
-        step1, step2, step3 = st.columns(3)
-        with step1:
-            st.markdown("**1. Strategic Pillars**")
-            st.caption("Pre-work — already done for you. Three default pillars are pre-loaded. Peek at them, edit them, or add your own.")
-            st.page_link("pages/2_Strategy.py", label="Open Strategy", icon="🧭")
-        with step2:
-            st.markdown("**2. Upload Feedback**")
-            st.caption("Pick a sample dataset below and click Analyze.")
-        with step3:
-            st.markdown("**3. See It In Action**")
-            st.caption("Check the Dashboard for an AI summary, then Opportunities for AI-proposed, strategy-aligned action.")
-            st.page_link("pages/1_Dashboard.py", label="Open Dashboard", icon="📊")
-            st.page_link("pages/3_Opportunities.py", label="Open Opportunities", icon="🎯")
+    st.markdown(demo_walkthrough_html(), unsafe_allow_html=True)
 
     st.caption(f"Demo mode — {remaining} of {config.demo_daily_call_limit} AI calls left today.")
 
