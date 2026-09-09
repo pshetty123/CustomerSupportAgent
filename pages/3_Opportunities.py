@@ -3,6 +3,7 @@ import streamlit as st
 
 from src.config import get_config
 from src.database import (
+    ensure_demo_pillars,
     get_batches,
     get_connection,
     get_opportunities,
@@ -47,6 +48,8 @@ except ValueError as e:
 
 init_db(config.db_path)
 conn = get_connection(config.db_path)
+if config.demo_mode:
+    ensure_demo_pillars(conn)
 
 batches = get_batches(conn)
 if not batches:

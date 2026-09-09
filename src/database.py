@@ -146,6 +146,29 @@ def delete_pillar(conn: sqlite3.Connection, pillar_id: int) -> None:
     conn.commit()
 
 
+DEMO_PILLARS = [
+    (
+        "Reliability & Performance",
+        "Keep core product flows fast, stable, and error-free.",
+    ),
+    (
+        "Billing & Pricing Transparency",
+        "Make charges, fees, and plan changes clear and predictable for customers.",
+    ),
+    (
+        "Support Responsiveness",
+        "Resolve customer issues quickly and consistently across channels.",
+    ),
+]
+
+
+def ensure_demo_pillars(conn: sqlite3.Connection) -> None:
+    if get_pillars(conn):
+        return
+    for name, description in DEMO_PILLARS:
+        insert_pillar(conn, name, description)
+
+
 def insert_opportunities(conn: sqlite3.Connection, batch_id: int, proposals: list[dict]) -> None:
     now = datetime.now(timezone.utc).isoformat()
     conn.executemany(

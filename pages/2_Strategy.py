@@ -1,7 +1,7 @@
 import streamlit as st
 
 from src.config import get_config
-from src.database import delete_pillar, get_connection, get_pillars, init_db, insert_pillar
+from src.database import delete_pillar, ensure_demo_pillars, get_connection, get_pillars, init_db, insert_pillar
 from src.text_utils import escape_markdown_dollars
 from src.theme import apply_theme
 
@@ -17,6 +17,8 @@ except ValueError as e:
 
 init_db(config.db_path)
 conn = get_connection(config.db_path)
+if config.demo_mode:
+    ensure_demo_pillars(conn)
 
 st.write("Define the strategic pillars the AI should compare customer feedback against on the Opportunities page.")
 
