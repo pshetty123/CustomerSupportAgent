@@ -153,20 +153,28 @@ DEMO_PILLARS = [
     ),
     (
         "Billing & Pricing Transparency",
-        "Make charges, fees, and plan changes clear and predictable for customers.",
+        "Make charges, fees, and plan or contract changes clear and predictable for customers.",
     ),
     (
         "Support Responsiveness",
         "Resolve customer issues quickly and consistently across channels.",
     ),
+    (
+        "Trust, Safety & Compliance",
+        "Protect customers and the business through fraud prevention, data security, and regulatory compliance.",
+    ),
+    (
+        "Product Experience & Usability",
+        "Make everyday workflows and interfaces intuitive, discoverable, and frictionless.",
+    ),
 ]
 
 
 def ensure_demo_pillars(conn: sqlite3.Connection) -> None:
-    if get_pillars(conn):
-        return
+    existing_names = {p["name"] for p in get_pillars(conn)}
     for name, description in DEMO_PILLARS:
-        insert_pillar(conn, name, description)
+        if name not in existing_names:
+            insert_pillar(conn, name, description)
 
 
 def insert_opportunities(conn: sqlite3.Connection, batch_id: int, proposals: list[dict]) -> None:
