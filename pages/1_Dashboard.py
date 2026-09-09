@@ -3,12 +3,14 @@ import plotly.express as px
 import streamlit as st
 
 from src.config import get_config
-from src.database import get_batches, get_connection, get_kpis, get_reviews, init_db
+from src.database import get_batches, get_connection, get_kpis, get_reviews, get_today_usage, init_db, record_usage
 from src.chart_colors import TAXONOMY_COLORS
 from src.gemini_client import GeminiClient
 from src.text_utils import escape_markdown_dollars
+from src.theme import PLOTLY_DARK_LAYOUT, apply_theme
 
 st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
+apply_theme()
 
 
 def build_summary_digest(chart_df: pd.DataFrame) -> str:
@@ -82,12 +84,24 @@ if chart_df.empty:
     st.info("All rows in this selection failed to analyze — no chart data to show.")
 else:
     st.subheader("Executive Summary")
-    if st.button("Generate Executive Summary"):
+
+    demo_conn = get_connection(config.db_path) if config.demo_mode else None
+    demo_usage = get_today_usage(demo_conn) if demo_conn else 0
+    if demo_conn:
+        demo_conn.close()
+
+    if config.demo_mode and demo_usage >= config.demo_daily_call_limit:
+        st.warning("Demo usage limit reached for today. Please check back tomorrow!")
+    elif st.button("Generate Executive Summary"):
         gemini_client = GeminiClient(config.gemini_api_key, config.gemini_model)
         digest = build_summary_digest(chart_df)
         try:
             with st.spinner("Generating executive summary..."):
                 st.session_state["exec_summary"] = gemini_client.generate_executive_summary(digest)
+            if config.demo_mode:
+                usage_conn = get_connection(config.db_path)
+                record_usage(usage_conn, 1)
+                usage_conn.close()
         except Exception as e:
             st.error(f"Could not generate executive summary: {e}")
 
@@ -103,13 +117,13 @@ else:
     with c1:
         sentiment_counts = chart_df["sentiment"].value_counts().reset_index()
         st.plotly_chart(
-            px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment Distribution", color="sentiment", color_discrete_map=TAXONOMY_COLORS),
+            px.pie(sentiment_counts, names="sentiment", values="count", title="Sentiment Distribution", color="sentiment", color_discrete_map=TAXONOMY_COLORS).update_layout(**PLOTLY_DARK_LAYOUT),
             use_container_width=True,
         )
     with c2:
         priority_counts = chart_df["priority"].value_counts().reset_index()
         st.plotly_chart(
-            px.bar(priority_counts, x="priority", y="count", title="Priority Breakdown", color="priority", color_discrete_map=TAXONOMY_COLORS),
+            px.bar(priority_counts, x="priority", y="count", title="Priority Breakdown", color="priority", color_discrete_map=TAXONOMY_COLORS).update_layout(**PLOTLY_DARK_LAYOUT),
             use_container_width=True,
         )
 
@@ -117,18 +131,21 @@ else:
     with c3:
         category_counts = chart_df["category"].value_counts().reset_index()
         st.plotly_chart(
-            px.bar(category_counts, x="category", y="count", title="Category Breakdown", color="category", color_discrete_map=TAXONOMY_COLORS),
+            px.bar(category_counts, x="category", y="count", title="Category Breakdown", color="category", color_discrete_map=TAXONOMY_COLORS).update_layout(**PLOTLY_DARK_LAYOUT),
             use_container_width=True,
         )
     with c4:
         emotion_counts = chart_df["emotion"].value_counts().reset_index()
         st.plotly_chart(
-            px.bar(emotion_counts, x="emotion", y="count", title="Emotion Distribution", color="emotion", color_discrete_map=TAXONOMY_COLORS),
+            px.bar(emotion_counts, x="emotion", y="count", title="Emotion Distribution", color="emotion", color_discrete_map=TAXONOMY_COLORS).update_layout(**PLOTLY_DARK_LAYOUT),
             use_container_width=True,
         )
 
     volume = chart_df.groupby("analyzed_date").size().reset_index(name="count")
-    st.plotly_chart(px.line(volume, x="analyzed_date", y="count", title="Review Volume Over Time"), use_container_width=True)
+    st.plotly_chart(
+        px.line(volume, x="analyzed_date", y="count", title="Review Volume Over Time").update_layout(**PLOTLY_DARK_LAYOUT),
+        use_container_width=True,
+    )
 
 st.subheader("Reviews")
 st.dataframe(reviews_df)

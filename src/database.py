@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS opportunities (
     created_at TEXT NOT NULL,
     reviewed_at TEXT
 );
+
+CREATE TABLE IF NOT EXISTS usage_log (
+    day TEXT PRIMARY KEY,
+    call_count INTEGER NOT NULL DEFAULT 0
+);
 """
 
 
@@ -188,5 +193,21 @@ def update_opportunity(
            SET title = ?, description = ?, pillar_id = ?, status = ?, reviewed_at = ?
            WHERE id = ?""",
         (title, description, pillar_id, status, datetime.now(timezone.utc).isoformat(), opportunity_id),
+    )
+    conn.commit()
+
+
+def get_today_usage(conn: sqlite3.Connection) -> int:
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    row = conn.execute("SELECT call_count FROM usage_log WHERE day = ?", (today,)).fetchone()
+    return row["call_count"] if row else 0
+
+
+def record_usage(conn: sqlite3.Connection, count: int) -> None:
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    conn.execute(
+        """INSERT INTO usage_log (day, call_count) VALUES (?, ?)
+           ON CONFLICT(day) DO UPDATE SET call_count = call_count + excluded.call_count""",
+        (today, count),
     )
     conn.commit()

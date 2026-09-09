@@ -8,14 +8,18 @@ from src.database import (
     get_opportunities,
     get_pillars,
     get_reviews,
+    get_today_usage,
     init_db,
     insert_opportunities,
+    record_usage,
     update_opportunity,
 )
 from src.gemini_client import GeminiClient
 from src.text_utils import escape_markdown_dollars
+from src.theme import apply_theme
 
 st.set_page_config(page_title="Opportunities", page_icon="🎯", layout="wide")
+apply_theme()
 st.title("Opportunities")
 
 
@@ -67,7 +71,14 @@ chart_df = reviews_df[reviews_df["sentiment"] != "ERROR"] if not reviews_df.empt
 if chart_df.empty:
     st.info("No analyzed reviews in the selected batch.")
 else:
-    if st.button("Find Opportunities", type="primary"):
+    demo_conn = get_connection(config.db_path) if config.demo_mode else None
+    demo_usage = get_today_usage(demo_conn) if demo_conn else 0
+    if demo_conn:
+        demo_conn.close()
+
+    if config.demo_mode and demo_usage >= config.demo_daily_call_limit:
+        st.warning("Demo usage limit reached for today. Please check back tomorrow!")
+    elif st.button("Find Opportunities", type="primary"):
         gemini_client = GeminiClient(config.gemini_api_key, config.gemini_model)
         digest = build_opportunity_digest(chart_df)
         try:
@@ -86,6 +97,8 @@ else:
             ]
             insert_conn = get_connection(config.db_path)
             insert_opportunities(insert_conn, selected_batch_id, proposal_dicts)
+            if config.demo_mode:
+                record_usage(insert_conn, 1)
             insert_conn.close()
             st.success(f"Found {len(proposal_dicts)} opportunities — see the review queue below.")
         except Exception as e:
